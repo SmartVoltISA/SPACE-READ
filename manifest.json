@@ -7,10 +7,18 @@
   "source": "SPACE Core",
   "publication_direction": "SPACE Core -> SPACE-READ",
   "write_back": false,
+  "physical_isolation": {
+    "core_credentials_in_read": false,
+    "core_write_api_exposed": false,
+    "external_ai_core_credentials": false,
+    "external_ai_core_write": false,
+    "publication_direction": "one-way"
+  },
   "external_ai": {
     "read": true,
     "analyze": true,
     "use": true,
+    "propose": true,
     "write_core": false
   },
   "principles": [
@@ -18,7 +26,10 @@
     "explicit provenance",
     "versioned history",
     "no retroactive history rewrite",
-    "hypotheses are not facts"
+    "hypotheses are not facts",
+    "least privilege",
+    "minimal blast radius",
+    "no public write path to Core"
   ],
   "planned_interfaces": [
     "node",
