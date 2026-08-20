@@ -1,0 +1,32 @@
+{
+  "name": "SPACE-READ",
+  "schema_version": "0.1.0",
+  "status": "foundation",
+  "visibility": "public",
+  "access_model": "read-only",
+  "source": "SPACE Core",
+  "publication_direction": "SPACE Core -> SPACE-READ",
+  "write_back": false,
+  "external_ai": {
+    "read": true,
+    "analyze": true,
+    "use": true,
+    "write_core": false
+  },
+  "principles": [
+    "controlled publication",
+    "explicit provenance",
+    "versioned history",
+    "no retroactive history rewrite",
+    "hypotheses are not facts"
+  ],
+  "planned_interfaces": [
+    "node",
+    "edge",
+    "graph",
+    "definition",
+    "experiment",
+    "publication_index"
+  ],
+  "repository": "SmartVoltISA/SPACE-READ"
+}
