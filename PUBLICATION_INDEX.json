@@ -1,0 +1,36 @@
+{
+  "name": "SPACE-READ publication index",
+  "schema_version": "1.0.0",
+  "publication_version": "0.1.0",
+  "status": "initial",
+  "items": [
+    {
+      "id": "space.architecture.overview",
+      "class": "structure",
+      "title": "SPACE architecture overview",
+      "status": "reviewed",
+      "publication_version": "1.0.0",
+      "path": "publications/space/ARCHITECTURE_OVERVIEW.md",
+      "provenance": {
+        "source": "SPACE Core",
+        "source_ref": "controlled internal publication",
+        "transformation": "public abstraction",
+        "review": "architectural consistency review"
+      }
+    },
+    {
+      "id": "space.invariants.read-boundary",
+      "class": "rule",
+      "title": "SPACE-READ boundary invariants",
+      "status": "verified",
+      "publication_version": "1.0.0",
+      "path": "READ_ONLY_POLICY.md",
+      "provenance": {
+        "source": "SPACE-READ",
+        "source_ref": "repository policy",
+        "transformation": "none",
+        "review": "security architecture review"
+      }
+    }
+  ]
+}
