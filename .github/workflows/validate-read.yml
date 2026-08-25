@@ -21,3 +21,5 @@ jobs:
         run: python scripts/validate_read.py
       - name: Run isolated adversarial tests
         run: python scripts/test_adversarial.py
+      - name: Audit workflow security
+        run: python scripts/workflow_security.py
