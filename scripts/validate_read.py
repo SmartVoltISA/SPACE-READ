@@ -1,15 +1,11 @@
 #!/usr/bin/env python3
-"""Static integrity checks for SPACE-READ.
-
-This validator is local and read-only. It must not contact SPACE Core or any
-external service. A failure is fail-closed: the publication is not considered
-valid unless every invariant below passes.
-"""
+"""Fail-closed static integrity checks for SPACE-READ."""
 from __future__ import annotations
 
 import json
 import re
 import sys
+from datetime import datetime
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -32,7 +28,7 @@ manifest = load_json(ROOT / "manifest.json")
 index = load_json(ROOT / "PUBLICATION_INDEX.json")
 schema = load_json(ROOT / "schema/publication.schema.json")
 
-# ---- Immutable publication boundary ----
+# Immutable boundary invariants.
 if isinstance(manifest, dict):
     required = {"name", "schema_version", "publication_version", "status",
                 "visibility", "access_model", "source", "publication_direction",
@@ -85,7 +81,7 @@ if isinstance(manifest, dict):
         if interfaces.get("network_read_api") is not False:
             fail("interfaces.network_read_api must be false until implemented")
 
-# ---- Publication index ----
+# Publication objects follow the repository's published schema.
 items: list[dict] = []
 if not isinstance(index, dict) or not isinstance(index.get("items"), list):
     fail("PUBLICATION_INDEX.json must contain an items array")
@@ -93,76 +89,97 @@ else:
     items = index["items"]
     ids: set[str] = set()
     allowed_statuses = {"draft", "reviewed", "verified", "rejected", "deprecated"}
-    allowed_kinds = {"architecture", "definition", "axiom", "hypothesis", "experiment", "result", "policy", "protocol"}
+    allowed_classes = {"axiom", "definition", "structure", "rule", "hypothesis", "experiment", "verified_result", "rejected_result", "open_question", "history"}
     for item in items:
         if not isinstance(item, dict):
             fail("publication index item must be an object")
             continue
         item_id = item.get("id")
-        if not isinstance(item_id, str) or not item_id.strip():
-            fail("publication item has no non-empty string id")
+        if not isinstance(item_id, str) or not re.fullmatch(r"[a-z0-9][a-z0-9._-]*", item_id):
+            fail(f"publication item has invalid id: {item_id!r}")
         elif item_id in ids:
             fail(f"duplicate publication id: {item_id}")
         else:
             ids.add(item_id)
 
+        for key in ("class", "title", "status", "schema_version", "publication_version", "published_at", "provenance"):
+            if key not in item:
+                fail(f"publication {item_id!r} missing required field: {key}")
+        if item.get("class") not in allowed_classes:
+            fail(f"publication {item_id!r} has invalid class: {item.get('class')!r}")
+        if item.get("status") not in allowed_statuses:
+            fail(f"publication {item_id!r} has invalid status: {item.get('status')!r}")
+        if not isinstance(item.get("title"), str) or not item.get("title", "").strip():
+            fail(f"publication {item_id!r} title must be non-empty")
+
+        published_at = item.get("published_at")
+        if not isinstance(published_at, str):
+            fail(f"publication {item_id!r} published_at must be a string")
+        else:
+            try:
+                datetime.fromisoformat(published_at.replace("Z", "+00:00"))
+            except ValueError:
+                fail(f"publication {item_id!r} published_at is not ISO-8601")
+
         path = item.get("path")
         if not isinstance(path, str) or not path.strip():
             fail(f"publication {item_id!r} has no path")
-            continue
-        target = (ROOT / path).resolve()
-        try:
-            target.relative_to(ROOT.resolve())
-        except ValueError:
-            fail(f"publication path escapes repository: {path}")
-            continue
-        if not target.is_file():
-            fail(f"publication target does not exist: {path}")
-
-        status = item.get("status")
-        if status not in allowed_statuses:
-            fail(f"publication {item_id!r} has invalid status: {status!r}")
-        kind = item.get("kind")
-        if kind not in allowed_kinds:
-            fail(f"publication {item_id!r} has invalid kind: {kind!r}")
+        else:
+            target = (ROOT / path).resolve()
+            try:
+                target.relative_to(ROOT.resolve())
+            except ValueError:
+                fail(f"publication path escapes repository: {path}")
+            else:
+                if not target.is_file():
+                    fail(f"publication target does not exist: {path}")
 
         provenance = item.get("provenance")
         if not isinstance(provenance, dict):
-            fail(f"publication {item_id!r} missing provenance object")
+            fail(f"publication {item_id!r} provenance must be an object")
         else:
-            for key in ("source", "source_ref", "published_at", "published_by"):
+            for key in ("source", "source_ref", "transformation"):
                 if not isinstance(provenance.get(key), str) or not provenance[key].strip():
                     fail(f"publication {item_id!r} provenance.{key} must be non-empty")
+            if item.get("status") == "verified" and not isinstance(provenance.get("verification"), str):
+                fail(f"verified publication {item_id!r} requires provenance.verification")
 
-        # A public index may describe proposals, but proposals cannot masquerade
-        # as verified facts.
-        if status == "verified" and kind in {"hypothesis", "result"}:
-            verification = item.get("verification")
-            if not isinstance(verification, dict):
-                fail(f"verified publication {item_id!r} requires verification metadata")
-
-# ---- Schema sanity ----
+# Validate the schema itself enough to catch accidental weakening.
 if isinstance(schema, dict):
     if schema.get("type") != "object":
         fail("publication schema root must be an object")
-    properties = schema.get("properties")
     required_schema = schema.get("required")
-    if not isinstance(properties, dict):
+    if not isinstance(required_schema, list) or set(required_schema) != {
+        "id", "class", "title", "status", "schema_version", "publication_version", "published_at", "provenance"
+    }:
+        fail("publication schema required fields were weakened or changed")
+    props = schema.get("properties")
+    if not isinstance(props, dict):
         fail("publication schema must define properties")
-    if not isinstance(required_schema, list) or not required_schema:
-        fail("publication schema must define required fields")
+    else:
+        expected_enums = {
+            "status": {"draft", "reviewed", "verified", "rejected", "deprecated"},
+            "class": {"axiom", "definition", "structure", "rule", "hypothesis", "experiment", "verified_result", "rejected_result", "open_question", "history"},
+        }
+        for key, expected in expected_enums.items():
+            actual = props.get(key, {}).get("enum")
+            if set(actual or []) != expected:
+                fail(f"publication schema {key} enum was weakened or changed")
+        if props.get("provenance", {}).get("additionalProperties") is not False:
+            fail("publication provenance must reject unknown properties")
 
-# ---- Repository path safety ----
+# Repository/path safety.
 for path in ROOT.rglob("*"):
     if not path.is_file() or ".git" in path.parts:
         continue
     try:
-        resolved = path.resolve()
-        resolved.relative_to(ROOT.resolve())
+        path.resolve().relative_to(ROOT.resolve())
     except ValueError:
         fail(f"file resolves outside repository: {path}")
 
-# ---- Credential and dangerous-control detection ----
+# Credential and forbidden-control detection. The validator itself is excluded
+# from the control-pattern scan because it necessarily contains the patterns
+# it is designed to detect.
 secret_patterns = [
     re.compile(r"gh[pousr]_[A-Za-z0-9_]{30,}"),
     re.compile(r"github_pat_[A-Za-z0-9_]{30,}"),
@@ -177,7 +194,7 @@ forbidden_control_patterns = [
 ]
 
 for path in ROOT.rglob("*"):
-    if not path.is_file() or ".git" in path.parts:
+    if not path.is_file() or ".git" in path.parts or path == Path(__file__).resolve():
         continue
     try:
         text = path.read_text(encoding="utf-8")
@@ -192,7 +209,6 @@ for path in ROOT.rglob("*"):
             fail(f"forbidden write control detected in {path}")
             break
 
-# ---- Fail closed ----
 if ERRORS:
     print("SPACE-READ validation FAILED")
     for error in ERRORS:
