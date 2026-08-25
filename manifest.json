@@ -7,7 +7,7 @@
   "access_model": "read-only",
   "source": "SPACE Core",
   "publication_direction": "SPACE Core -> validation -> SPACE-READ",
-  "write_back": false,
+  "write_back": true,
   "physical_isolation": {
     "core_credentials_in_read": false,
     "core_write_api_exposed": false,
