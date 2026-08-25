@@ -29,6 +29,7 @@
     "network_read_api": false
   },
   "entrypoints": {
+    "llm_start": "LLM_START.md",
     "contract": "PUBLICATION_CONTRACT.md",
     "ai_interface": "AI_INTERFACE.md",
     "proposal_protocol": "PROPOSAL_PROTOCOL.md",
@@ -36,7 +37,8 @@
     "publication_schema": "schema/publication.schema.json",
     "security": "SECURITY_ARCHITECTURE.md",
     "read_only_policy": "READ_ONLY_POLICY.md",
-    "recovery": "RECOVERY_PROTOCOL.md"
+    "recovery": "RECOVERY_PROTOCOL.md",
+    "license": "LICENSE"
   },
   "principles": [
     "controlled publication",
