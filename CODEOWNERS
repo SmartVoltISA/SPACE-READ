@@ -1,0 +1,10 @@
+# SPACE-READ is a protected publication surface.
+# Once branch protection/rulesets are enabled, changes require owner review.
+* @SmartVoltISA
+
+# Security-critical files always require owner review.
+manifest.json @SmartVoltISA
+PUBLICATION_INDEX.json @SmartVoltISA
+schema/ @SmartVoltISA
+scripts/ @SmartVoltISA
+.github/ @SmartVoltISA
