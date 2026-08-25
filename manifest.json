@@ -1,11 +1,12 @@
 {
   "name": "SPACE-READ",
-  "schema_version": "0.1.0",
-  "status": "foundation",
+  "schema_version": "1.0.0",
+  "publication_version": "0.1.0",
+  "status": "contract-defined",
   "visibility": "public",
   "access_model": "read-only",
   "source": "SPACE Core",
-  "publication_direction": "SPACE Core -> SPACE-READ",
+  "publication_direction": "SPACE Core -> validation -> SPACE-READ",
   "write_back": false,
   "physical_isolation": {
     "core_credentials_in_read": false,
@@ -21,23 +22,32 @@
     "propose": true,
     "write_core": false
   },
+  "interfaces": {
+    "repository_read": true,
+    "machine_readable_manifest": true,
+    "publication_index": true,
+    "network_read_api": false
+  },
+  "entrypoints": {
+    "contract": "PUBLICATION_CONTRACT.md",
+    "ai_interface": "AI_INTERFACE.md",
+    "proposal_protocol": "PROPOSAL_PROTOCOL.md",
+    "publication_index": "PUBLICATION_INDEX.json",
+    "publication_schema": "schema/publication.schema.json",
+    "security": "SECURITY_ARCHITECTURE.md",
+    "read_only_policy": "READ_ONLY_POLICY.md",
+    "recovery": "RECOVERY_PROTOCOL.md"
+  },
   "principles": [
     "controlled publication",
     "explicit provenance",
     "versioned history",
     "no retroactive history rewrite",
     "hypotheses are not facts",
+    "proposals are not accepted changes",
     "least privilege",
     "minimal blast radius",
     "no public write path to Core"
-  ],
-  "planned_interfaces": [
-    "node",
-    "edge",
-    "graph",
-    "definition",
-    "experiment",
-    "publication_index"
   ],
   "repository": "SmartVoltISA/SPACE-READ"
 }
