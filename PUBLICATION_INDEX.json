@@ -1,7 +1,7 @@
 {
   "name": "SPACE-READ publication index",
   "schema_version": "1.0.0",
-  "publication_version": "0.1.0",
+  "publication_version": "0.2.0",
   "status": "initial",
   "items": [
     {
@@ -9,7 +9,9 @@
       "class": "structure",
       "title": "SPACE architecture overview",
       "status": "reviewed",
+      "schema_version": "1.0.0",
       "publication_version": "1.0.0",
+      "published_at": "2026-08-25T17:30:00Z",
       "path": "publications/space/ARCHITECTURE_OVERVIEW.md",
       "provenance": {
         "source": "SPACE Core",
@@ -23,13 +25,16 @@
       "class": "rule",
       "title": "SPACE-READ boundary invariants",
       "status": "verified",
+      "schema_version": "1.0.0",
       "publication_version": "1.0.0",
+      "published_at": "2026-08-25T17:30:00Z",
       "path": "READ_ONLY_POLICY.md",
       "provenance": {
         "source": "SPACE-READ",
         "source_ref": "repository policy",
         "transformation": "none",
-        "review": "security architecture review"
+        "review": "security architecture review",
+        "verification": "adversarial read-boundary test passed"
       }
     }
   ]
