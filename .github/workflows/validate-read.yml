@@ -19,3 +19,5 @@ jobs:
           persist-credentials: false
       - name: Validate SPACE-READ
         run: python scripts/validate_read.py
+      - name: Run isolated adversarial tests
+        run: python scripts/test_adversarial.py
