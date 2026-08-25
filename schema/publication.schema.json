@@ -1,0 +1,32 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/SmartVoltISA/SPACE-READ/schema/publication.schema.json",
+  "title": "SPACE-READ Publication",
+  "type": "object",
+  "required": ["id", "class", "title", "status", "schema_version", "publication_version", "published_at", "provenance"],
+  "properties": {
+    "id": {"type": "string", "pattern": "^[a-z0-9][a-z0-9._-]*$"},
+    "class": {"enum": ["axiom", "definition", "structure", "rule", "hypothesis", "experiment", "verified_result", "rejected_result", "open_question", "history"]},
+    "title": {"type": "string", "minLength": 1},
+    "status": {"enum": ["draft", "reviewed", "verified", "rejected", "deprecated"]},
+    "schema_version": {"type": "string"},
+    "publication_version": {"type": "string"},
+    "published_at": {"type": "string", "format": "date-time"},
+    "scope": {"type": "string"},
+    "provenance": {
+      "type": "object",
+      "required": ["source", "source_ref", "transformation"],
+      "properties": {
+        "source": {"type": "string"},
+        "source_ref": {"type": "string"},
+        "transformation": {"type": "string"},
+        "review": {"type": "string"},
+        "verification": {"type": "string"}
+      },
+      "additionalProperties": false
+    },
+    "content": {},
+    "related": {"type": "array", "items": {"type": "string"}}
+  },
+  "additionalProperties": false
+}
