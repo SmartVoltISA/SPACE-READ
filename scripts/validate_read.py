@@ -177,9 +177,12 @@ for path in ROOT.rglob("*"):
     except ValueError:
         fail(f"file resolves outside repository: {path}")
 
-# Credential and forbidden-control detection. The validator itself is excluded
-# from the control-pattern scan because it necessarily contains the patterns
-# it is designed to detect.
+# Credential and forbidden-control detection.
+# Adversarial fixtures intentionally contain the exact strings they test;
+# they are executed only inside isolated temporary copies by test_adversarial.py.
+SCAN_EXCLUSIONS = {
+    Path("scripts/test_adversarial.py"),
+}
 secret_patterns = [
     re.compile(r"gh[pousr]_[A-Za-z0-9_]{30,}"),
     re.compile(r"github_pat_[A-Za-z0-9_]{30,}"),
@@ -195,6 +198,9 @@ forbidden_control_patterns = [
 
 for path in ROOT.rglob("*"):
     if not path.is_file() or ".git" in path.parts or path == Path(__file__).resolve():
+        continue
+    rel = path.relative_to(ROOT)
+    if rel in SCAN_EXCLUSIONS:
         continue
     try:
         text = path.read_text(encoding="utf-8")
