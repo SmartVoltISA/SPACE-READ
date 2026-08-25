@@ -1,0 +1,8 @@
+# Security-sensitive paths require owner review once branch rules are enabled.
+.github/workflows/ @SmartVoltISA
+scripts/ @SmartVoltISA
+manifest.json @SmartVoltISA
+PUBLICATION_INDEX.json @SmartVoltISA
+schema/ @SmartVoltISA
+SECURITY_ARCHITECTURE.md @SmartVoltISA
+SECURITY_HARDENING.md @SmartVoltISA
